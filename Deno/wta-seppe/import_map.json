@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "lodash-es": "./node_modules/lodash-es/lodash.js"
+  }
+}
