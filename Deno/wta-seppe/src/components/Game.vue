@@ -177,13 +177,13 @@ export default {
     }
     animate();
     function MoveBalk(){
-        console.log(store.dinosaur.description);
-        if(store.dinosaur.description !== undefined){
-            if(store.dinosaur.description == "go right"){
+        console.log(store.movement.description);
+        if(store.movement.description !== undefined){
+            if(store.movement.description == "go right"){
                 if(balkBody.position.x <= 19){
                     balkBody.position.x +=  0.5;
                 }
-            }else if(store.dinosaur.description == "go left"){
+            }else if(store.movement.description == "go left"){
                 if(balkBody.position.x >= -19){
                     balkBody.position.x -=  0.5;
                 }

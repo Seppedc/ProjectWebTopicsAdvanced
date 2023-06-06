@@ -45,13 +45,13 @@ export default {
             // Update direction value
             if (pose.rightEar.confidence > 0.8 && pose.leftEar.confidence > 0.8) {
               console.log("stand still")
-              store.setDinosaur("stand still")
+              store.setMovement("stand still")
             } else if (pose.rightEar.confidence > 0.8) {
               console.log("go left")
-              store.setDinosaur("go left")
+              store.setMovement("go left")
             } else if (pose.leftEar.confidence > 0.8) {
               console.log("go right")
-              store.setDinosaur("go right")
+              store.setMovement("go right")
             }
           }
         };
