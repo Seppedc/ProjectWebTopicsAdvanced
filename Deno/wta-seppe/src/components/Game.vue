@@ -4,6 +4,7 @@ import * as CANNON from '../../lib/cannon-es';
 import * as THREE from '../../lib/three.module';
 import { OrbitControls } from '../../lib/OrbitControls';
 import CannonDebugger from '../../lib/cannon-es-debugger';
+import { store } from '../store.js';
 
 
 export default {
@@ -13,6 +14,11 @@ export default {
     return {
       
     };
+  },
+  data() {
+    return {
+      store
+    }
   },
   mounted() {
     const resizeUpdateInterval = 500;
@@ -150,7 +156,7 @@ export default {
 
     // Animation loop
     function animate() {
-    
+      MoveBalk();
       checkEndLevel();
       requestAnimationFrame(animate);
       //controls.update();
@@ -170,7 +176,20 @@ export default {
       //labelRenderer.render( scene, camera );
     }
     animate();
-
+    function MoveBalk(){
+        console.log(store.dinosaur.description);
+        if(store.dinosaur.description !== undefined){
+            if(store.dinosaur.description == "go right"){
+                if(balkBody.position.x <= 19){
+                    balkBody.position.x +=  0.5;
+                }
+            }else if(store.dinosaur.description == "go left"){
+                if(balkBody.position.x >= -19){
+                    balkBody.position.x -=  0.5;
+                }
+            }
+        }
+    }
     // Handle window resize
     window.addEventListener('resize', () => {
       const width = window.innerWidth;
@@ -220,158 +239,158 @@ export default {
         }
     }
 
-  function CreateBlocksLevel1(){
-      const offsetBoxes = new THREE.Vector3(-12.5,0,-12.5); 
-      for (let i = 0; i < 1; i++) {
-          for (let y = 0; y < 1; y++) {
-              const boxGeometryLoop = new THREE.BoxGeometry(2.5, 0.5, 1);
-              const boxMaterialLoop = new THREE.MeshNormalMaterial();
-              const test = new THREE.Mesh(boxGeometryLoop, boxMaterialLoop);
-              const spacebetween = new THREE.Vector3(i*5,0, y*2); 
-              test.position.copy(new THREE.Vector3(i,0,y).add(offsetBoxes).add(spacebetween));
-              boxesVisual.push({body:test,id:test.id});
-              scene.add(test);
-          }
-      }
-      for (let i = 0; i < 1; i++) {
-          for (let y = 0; y < 1; y++) {
-              const boxBodyLoop = new CANNON.Body({
-                  mass: 1000000,
-                  shape: new CANNON.Box(new CANNON.Vec3(1.25, 0.5, 0.5)),
-                  
-              });
-              boxBodyLoop.position.set(i -12.5 + (i*5), 0.5, y-12.5 +(y*2));
-              boxBodyLoop.addEventListener("collide",function(e){
-                  if(gamestarted){
-                      let place = 0;
-                      for (let index = 0; index < boxesPhysical.length; index++) {
-                          if(boxesPhysical[index].id == boxBodyLoop.id){
-                              place = index;
-                          }
-                      }
-                      let a = boxesPhysical[place].body;
-                      let b = boxesVisual[place].body;
-                      physicsWorld.removeBody(a);
-                      scene.remove(b);
-                      zSpeed = -zSpeed;
-                      points += 100;
-                      boxesPhysical.splice(place,1);
-                      boxesVisual.splice(place,1);
-                  }
-              });          
-              physicsWorld.addBody(boxBodyLoop);
-              boxesPhysical.push({body:boxBodyLoop,id:boxBodyLoop.id});
+    function CreateBlocksLevel1(){
+        const offsetBoxes = new THREE.Vector3(-12.5,0,-12.5); 
+        for (let i = 0; i < 1; i++) {
+            for (let y = 0; y < 1; y++) {
+                const boxGeometryLoop = new THREE.BoxGeometry(2.5, 0.5, 1);
+                const boxMaterialLoop = new THREE.MeshNormalMaterial();
+                const test = new THREE.Mesh(boxGeometryLoop, boxMaterialLoop);
+                const spacebetween = new THREE.Vector3(i*5,0, y*2); 
+                test.position.copy(new THREE.Vector3(i,0,y).add(offsetBoxes).add(spacebetween));
+                boxesVisual.push({body:test,id:test.id});
+                scene.add(test);
+            }
+        }
+        for (let i = 0; i < 1; i++) {
+            for (let y = 0; y < 1; y++) {
+                const boxBodyLoop = new CANNON.Body({
+                    mass: 1000000,
+                    shape: new CANNON.Box(new CANNON.Vec3(1.25, 0.5, 0.5)),
+                    
+                });
+                boxBodyLoop.position.set(i -12.5 + (i*5), 0.5, y-12.5 +(y*2));
+                boxBodyLoop.addEventListener("collide",function(e){
+                    if(gamestarted){
+                        let place = 0;
+                        for (let index = 0; index < boxesPhysical.length; index++) {
+                            if(boxesPhysical[index].id == boxBodyLoop.id){
+                                place = index;
+                            }
+                        }
+                        let a = boxesPhysical[place].body;
+                        let b = boxesVisual[place].body;
+                        physicsWorld.removeBody(a);
+                        scene.remove(b);
+                        zSpeed = -zSpeed;
+                        points += 100;
+                        boxesPhysical.splice(place,1);
+                        boxesVisual.splice(place,1);
+                    }
+                });          
+                physicsWorld.addBody(boxBodyLoop);
+                boxesPhysical.push({body:boxBodyLoop,id:boxBodyLoop.id});
 
-              
-          }
-      }
-  }
+                
+            }
+        }
+    }
 
-  function MoveBall(){
-      if(!gamestarted){
-          return;
-      }
-      if(lives > 0){
-          balBody.position.x += xSpeed*speedMultiplier ;
-          if(balBody.position.x <= -23.8 || balBody.position.x >= 23.8){
-              xSpeed = -xSpeed;
-          }
-          balBody.position.z += zSpeed;
-          if(balBody.position.z <= -17){
-              zSpeed = -zSpeed;
-          }
-          if(balBody.position.z > 21){
-              LoseLife();
-          }
-      }else{
-          gameOver();
-      }
-  }
-  function gameOver(){
-      console.log("death");
-      balBody.position.x =0;
-      balBody.position.z = 16;
-      zSpeed = -0.4;
-      xSpeed = 0.2
-      this.gamestarted = false;
-  }
-  function LoseLife(){
-      lives --;
-      gamestarted = false;
-      balBody.position.x =0;
-      balBody.position.z = 16;
-      zSpeed = -0.4;
-      xSpeed = 0.2
-  }
+    function MoveBall(){
+        if(!gamestarted){
+            return;
+        }
+        if(lives > 0){
+            balBody.position.x += xSpeed*speedMultiplier ;
+            if(balBody.position.x <= -23.8 || balBody.position.x >= 23.8){
+                xSpeed = -xSpeed;
+            }
+            balBody.position.z += zSpeed;
+            if(balBody.position.z <= -17){
+                zSpeed = -zSpeed;
+            }
+            if(balBody.position.z > 21){
+                LoseLife();
+            }
+        }else{
+            gameOver();
+        }
+    }
+    function gameOver(){
+        console.log("death");
+        balBody.position.x =0;
+        balBody.position.z = 16;
+        zSpeed = -0.4;
+        xSpeed = 0.2
+        this.gamestarted = false;
+    }
+    function LoseLife(){
+        lives --;
+        gamestarted = false;
+        balBody.position.x =0;
+        balBody.position.z = 16;
+        zSpeed = -0.4;
+        xSpeed = 0.2
+    }
 
-  function TextOnScreen(){
-      puntenText();
-      levelText();
-      levensText();
-  }
-  function puntenText(){
-      const levelDiv = document.createElement( 'div' );
-      levelDiv.className = 'label';
-      levelDiv.textContent = 'Punten: '+ points;
-      levelDiv.style.backgroundColor = 'transparent';
+    function TextOnScreen(){
+        puntenText();
+        levelText();
+        levensText();
+    }
+    function puntenText(){
+        const levelDiv = document.createElement( 'div' );
+        levelDiv.className = 'label';
+        levelDiv.textContent = 'Punten: '+ points;
+        levelDiv.style.backgroundColor = 'transparent';
 
-      const levelLabel = new CSS2DObject( levelDiv );
-      levelLabel.position.set(0, 10, 0);
-      levelLabel.center.set( 0, 1 );
-      scene.add( levelLabel );
-      levelLabel.layers.set( 0 );
-  }
-  function levensText(){
-      const levelDiv = document.createElement( 'div' );
-      levelDiv.className = 'label';
-      levelDiv.textContent = 'Levens: '+lives;
-      levelDiv.style.backgroundColor = 'transparent';
+        const levelLabel = new CSS2DObject( levelDiv );
+        levelLabel.position.set(0, 10, 0);
+        levelLabel.center.set( 0, 1 );
+        scene.add( levelLabel );
+        levelLabel.layers.set( 0 );
+    }
+    function levensText(){
+        const levelDiv = document.createElement( 'div' );
+        levelDiv.className = 'label';
+        levelDiv.textContent = 'Levens: '+lives;
+        levelDiv.style.backgroundColor = 'transparent';
 
-      const levelLabel = new CSS2DObject( levelDiv );
-      levelLabel.position.set(0, 10, 0.5 );
-      levelLabel.center.set( 0, 1 );
-      scene.add( levelLabel );
-      levelLabel.layers.set( 0 );
-  }
-  function levelText(){
-      const levelDiv = document.createElement( 'div' );
-      levelDiv.className = 'label';
-      levelDiv.textContent = 'Level: '+level;
-      levelDiv.style.backgroundColor = 'transparent';
+        const levelLabel = new CSS2DObject( levelDiv );
+        levelLabel.position.set(0, 10, 0.5 );
+        levelLabel.center.set( 0, 1 );
+        scene.add( levelLabel );
+        levelLabel.layers.set( 0 );
+    }
+    function levelText(){
+        const levelDiv = document.createElement( 'div' );
+        levelDiv.className = 'label';
+        levelDiv.textContent = 'Level: '+level;
+        levelDiv.style.backgroundColor = 'transparent';
 
-      const levelLabel = new CSS2DObject( levelDiv );
-      levelLabel.position.set(0, 10, -0.5 );
-      levelLabel.center.set( 0, 1 );
-      scene.add( levelLabel );
-      levelLabel.layers.set( 0 );
-  }
-  function checkEndLevel(){
-      if(boxesPhysical.length == 0){
-          gamestarted = false;
-          level++;
-          balBody.position.x =0;
-          balBody.position.z = 16;
-          zSpeed = -0.4;
-          xSpeed = 0.2
+        const levelLabel = new CSS2DObject( levelDiv );
+        levelLabel.position.set(0, 10, -0.5 );
+        levelLabel.center.set( 0, 1 );
+        scene.add( levelLabel );
+        levelLabel.layers.set( 0 );
+    }
+    function checkEndLevel(){
+        if(boxesPhysical.length == 0){
+            gamestarted = false;
+            level++;
+            balBody.position.x =0;
+            balBody.position.z = 16;
+            zSpeed = -0.4;
+            xSpeed = 0.2
 
-          levelClear();
-          generateLevel();
-      }
-  }
-  function levelClear(){
-      //add transition text
-  }
-  function generateLevel(){
-      if(level == 1){
-          CreateBlocksLevel1();
-      }else if(level ==2){
-          CreateBlocksLevel1();
-          speedMultiplier = 2;
-      }else if(level ==3){
-          CreateBlocksLevel1();
-          speedMultiplier = 2.5;
-      }
-  }
+            levelClear();
+            generateLevel();
+        }
+    }
+    function levelClear(){
+        //add transition text
+    }
+    function generateLevel(){
+        if(level == 1){
+            CreateBlocksLevel1();
+        }else if(level ==2){
+            CreateBlocksLevel1();
+            speedMultiplier = 2;
+        }else if(level ==3){
+            CreateBlocksLevel1();
+            speedMultiplier = 2.5;
+        }
+    }
   },
 };
 </script>

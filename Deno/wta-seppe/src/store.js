@@ -2,8 +2,8 @@ import { reactive } from "vue";
 
 export const store = reactive({
   dinosaur: {},
-  setDinosaur(name, description) {
-    this.dinosaur.name = name;
+  setDinosaur(description) {
+    console.log(description);
     this.dinosaur.description = description;
   },
 });
