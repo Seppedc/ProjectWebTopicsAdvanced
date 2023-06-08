@@ -1,0 +1,23 @@
+Install Deno on your device.
+After downloading the repo, navigate to the wta-Seppe folder inside the Deno folder
+run the command NPM install
+
+In this project there is a small api.
+to host this api excecute following command in the api folder:
+deno run --allow-read --allow-write  main.ts
+
+Open a second terminal to host the frontend.
+navigate to the wta-Seppe folder inside the Deno folder.
+here u can execute the following command to start the vue project: 
+deno task dev
+
+If the commands were succesfull its should give u the link for the forntend
+
+
+Experimenting with the site: 
+Rignt now when u load up the site u can navigate to the diffrent pages. 
+As soon as u navigate to the Gamestart page the game will be loaded in and u can play the game.
+If the player gains enough points to be on the leaderboard a popup will be shown when the game is over.
+The user can insert their name.
+The data will be saved  using the api but when u try and use the site again everything breaks.
+When u reload the site u can use it again. and u will be able to see that the highscores have been updated.
