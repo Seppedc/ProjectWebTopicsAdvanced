@@ -52,5 +52,5 @@ jobs:
         with:
           app-name: 'wtaSeppe'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_164B1EE6CA284AB785E2792E17A080A5 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B884BE22E46A46FB8098F60A9C2BF6DD }}
           package: .
