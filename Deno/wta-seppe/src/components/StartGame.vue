@@ -1,7 +1,7 @@
 <template>
     <div>
       <Game />
-      <Controls />
+      
     </div>
   </template>
   
@@ -13,14 +13,13 @@
   const app = createApp({
   });
   
-  
-  app.component("Controls", Controls); // Register the Controls component
-  app.component("Game", Game); // Register the Game component
+  //<Controls />
+  app.component("Controls", Controls); 
+  app.component("Game", Game);
 
   app.mount("#app");
   </script>
   
   <style scoped>
-  /* Your main component's style */
   </style>
   

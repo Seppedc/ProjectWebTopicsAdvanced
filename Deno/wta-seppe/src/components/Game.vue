@@ -200,7 +200,7 @@ export default {
     pointsLabel.setText("Points: "+points);
     livesLabel.setText("Lives: "+lives);
 
-    var StartGame = createLabel("Start the game by pressing V", 125, 75);
+    var StartGame = createLabel("Start the game by pressing V", 0, 75);
 
     // Animation loop
     function animate() {
@@ -211,7 +211,6 @@ export default {
       }
       //controls.update();
       physicsWorld.fixedStep();
-      cannonDebugger.update();
       //link floors togheter
       mesh.position.copy(groundBody.position);
       mesh.quaternion.copy(groundBody.quaternion);
@@ -295,8 +294,8 @@ export default {
 
     function CreateBlocksLevel1(){
         const offsetBoxes = new THREE.Vector3(-12.5,0,-12.5); 
-        for (let i = 0; i < 1; i++) {
-            for (let y = 0; y < 1; y++) {
+        for (let i = 0; i < 5; i++) {
+            for (let y = 0; y < 5; y++) {
                 const boxGeometryLoop = new THREE.BoxGeometry(2.5, 0.5, 1);
                 const boxMaterialLoop = new THREE.MeshNormalMaterial();
                 const test = new THREE.Mesh(boxGeometryLoop, boxMaterialLoop);
@@ -306,8 +305,8 @@ export default {
                 scene.add(test);
             }
         }
-        for (let i = 0; i < 1; i++) {
-            for (let y = 0; y < 1; y++) {
+        for (let i = 0; i < 5; i++) {
+            for (let y = 0; y < 5; y++) {
                 const boxBodyLoop = new CANNON.Body({
                     mass: 1000000,
                     shape: new CANNON.Box(new CANNON.Vec3(1.25, 0.5, 0.5)),
@@ -412,7 +411,6 @@ export default {
         submitBtn.addEventListener("click", function() {
             var name = input.value;
             if (name.trim() !== "") {
-                points = 6;
                 submitData(name,points);
             }
         });
@@ -527,7 +525,7 @@ export default {
 </script>
 <template>
      
-    <div ref="container" class="container"></div>
+    <div ref="container" class="containerGame"></div>
 </template>
 <style>
 .text-fields {
@@ -542,9 +540,11 @@ export default {
 .text-field {
   margin: 0px;
 }
-.container{
-    position: relative;
-    left: -575px;
+.containerGame{
+    position: absolute;
+    left: 0;
+    top: 0;
+    
 }
 .label {
   position: absolute;
