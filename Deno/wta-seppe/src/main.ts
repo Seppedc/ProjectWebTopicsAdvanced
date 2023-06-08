@@ -3,8 +3,7 @@ import App from "./App.vue";
 import router from "./router/index";
 import Controls from './components/Controls.vue';
 import Game from './components/Game.vue'
-import { createApp } from 'vue';
-
+import { createApp } from '../node_modules/.deno/vue@3.3.4/node_modules/vue/dist/vue';
 const app = createApp(App);
 
 app.use(router);
