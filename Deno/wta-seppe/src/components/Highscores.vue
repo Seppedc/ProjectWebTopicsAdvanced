@@ -6,7 +6,7 @@
     data() {
         const scores = ref([])
         const fetchData = async () => {
-            const res = await fetch("http://localhost:8000/api")
+            const res = await fetch("https://wta.deno.dev/api")
             scores.value = await res.json();
         }
 

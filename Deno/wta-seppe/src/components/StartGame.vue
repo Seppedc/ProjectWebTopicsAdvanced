@@ -1,7 +1,7 @@
 <template>
     <div>
       <Game />
-      
+      <Controls />
     </div>
   </template>
   
@@ -13,7 +13,6 @@
   const app = createApp({
   });
   
-  //<Controls />
   app.component("Controls", Controls); 
   app.component("Game", Game);
 

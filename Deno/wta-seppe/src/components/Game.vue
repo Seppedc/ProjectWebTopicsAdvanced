@@ -193,9 +193,9 @@ export default {
     
     return label;
     }
-    var levelLabel = createLabel("Level: 1", -600, -400);
-    var pointsLabel = createLabel("Points: 0", -600, -375);
-    var livesLabel = createLabel("Lives: 3", -600, -350);
+    var levelLabel = createLabel("Level: 1", -500, -375);
+    var pointsLabel = createLabel("Points: 0", -500, -350);
+    var livesLabel = createLabel("Lives: 3", -500, -325);
     levelLabel.setText("Level: "+level);
     pointsLabel.setText("Points: "+points);
     livesLabel.setText("Lives: "+lives);
@@ -368,7 +368,7 @@ export default {
         xSpeed = 0.2
         gamestarted = false;
         const scores = ref([])
-        const res = await fetch("http://localhost:8000/api")
+        const res = await fetch("https://wta.deno.dev/api")
         scores.value = await res.json();
         if(points>scores.value[4].score){
             var popup = createPopup();
@@ -418,7 +418,7 @@ export default {
     async function submitData(name, points){
     const data = { name, points };
     try {
-        const res = await fetch("http://localhost:8000/api/edit", {
+        const res = await fetch("https://wta.deno.dev/api/edit", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
