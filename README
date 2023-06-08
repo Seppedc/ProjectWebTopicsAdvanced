@@ -1,3 +1,5 @@
+This project contains 2 folders, the deno folder with the finalized project and the test folder where the functionality of the game and movement were created seperatly.
+
 Install Deno on your device.
 After downloading the repo, navigate to the wta-Seppe folder inside the Deno folder
 run the command NPM install
