@@ -16,13 +16,14 @@ router
   .post("/api/edit", async (context) => {
     const { name, points } = await context.request.body().value;
     const newItem = { name: String(name), score: String(points) };
-
     data.push(newItem);
     data.sort((a: { score: string }, b: { score: string }) => Number(b.score) - Number(a.score));
-
     if (data.length > MAX_ITEMS) {
       data.length = MAX_ITEMS;
     }
+    Deno.writeTextFileSync('./data.json', JSON.stringify(data, null, 2), { append: false });
+
+
     context.response.body = { success: true, message: "Data updated successfully" };
   });
 

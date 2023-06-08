@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "../components/HomePage.vue";
 import StartGame from "../components/StartGame.vue";
-
+import Highscores from "../components/Highscores.vue"
 const routes = [
   {
     path: "/",
@@ -12,6 +12,11 @@ const routes = [
     path: "/Startgame",
     name: "Startgame",
     component: StartGame,
+  },
+  {
+    path: "/Highscores",
+    name: "Highscores",
+    component: Highscores,
   },
   // {
   //   path: "/controls",

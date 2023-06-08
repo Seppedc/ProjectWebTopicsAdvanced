@@ -5,6 +5,7 @@ import * as THREE from '../../lib/three.module';
 import { OrbitControls } from '../../lib/OrbitControls';
 import CannonDebugger from '../../lib/cannon-es-debugger';
 import { store } from '../store.js';
+import { CSS2DRenderer, CSS2DObject } from '../../lib/CSS2DRenderer';
 
 
 export default {
@@ -17,17 +18,28 @@ export default {
   },
   data() {
     return {
-      store
+      store,
+      points:0,
+      lives:1,
+      level:1,
     }
+  },
+  methods: {
+    navigateTo(endpoint) {
+      this.$router.push(endpoint);
+    }
+  },
+  beforeDestroy() {
+    console.log("test");
   },
   mounted() {
     const resizeUpdateInterval = 500;
-    let level = 1;
+    let level = this.level;
     let xSpeed = 0.2;
     let zSpeed = -0.4;
-    let lives = 3;
+    let lives = this.lives;
     let gamestarted = false;
-    let points = 0;
+    let points = this.points;
     let GROUP1 = 1;
     let GROUP2 = 2;
     let GROUP3 = 4;
@@ -154,11 +166,49 @@ export default {
     physicsWorld.addBody(balkBody);
     generateLevel();
 
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0';
+    document.body.appendChild(labelRenderer.domElement);
+
+
+    function createLabel(text, x, y) {
+        var div = document.createElement('div');
+        div.className = 'label';
+        div.textContent = text;
+        div.style.position = 'absolute';
+        div.style.left = x + 'px';
+        div.style.top = y + 'px';
+        document.body.appendChild(div);
+        
+        var label = new CSS2DObject(div);
+        scene.add(label);
+        
+        // Method to update the label text
+        label.setText = function(newText) {
+            div.textContent = newText;
+        };
+    
+    return label;
+    }
+    var levelLabel = createLabel("Level: 1", -600, -400);
+    var pointsLabel = createLabel("Points: 0", -600, -375);
+    var livesLabel = createLabel("Lives: 3", -600, -350);
+    levelLabel.setText("Level: "+level);
+    pointsLabel.setText("Points: "+points);
+    livesLabel.setText("Lives: "+lives);
+
+    var StartGame = createLabel("Start the game by pressing V", 125, 75);
+
     // Animation loop
     function animate() {
       MoveBalk();
       checkEndLevel();
-      requestAnimationFrame(animate);
+      if(lives !=0){
+        requestAnimationFrame(animate);
+      }
       //controls.update();
       physicsWorld.fixedStep();
       cannonDebugger.update();
@@ -172,8 +222,10 @@ export default {
       //sync position
       bal.position.copy(balBody.position);
       bal.quaternion.copy(balBody.quaternion);
+      labelRenderer.render(scene, camera);
       renderer.render( scene, camera );
-      //labelRenderer.render( scene, camera );
+
+      
     }
     animate();
     function MoveBalk(){
@@ -197,6 +249,8 @@ export default {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+      setCanvasDimensions(renderer.domElement, width, height);
+
     });
 
     // Handle keydown event
@@ -217,6 +271,7 @@ export default {
           break
         case 'v':
           gamestarted = true;
+          StartGame.setText(" ");
           break
       }
     });
@@ -225,7 +280,6 @@ export default {
     onBeforeUnmount(() => {
       renderer.dispose();
       controls.dispose();
-      cannonDebugger.destroy();
       this.$el.removeChild(renderer.domElement);
     });
     function setCanvasDimensions(canvas,width,height,set2dTransform = false){
@@ -276,6 +330,7 @@ export default {
                         points += 100;
                         boxesPhysical.splice(place,1);
                         boxesVisual.splice(place,1);
+                        pointsLabel.setText("Points: "+points);
                     }
                 });          
                 physicsWorld.addBody(boxBodyLoop);
@@ -306,64 +361,111 @@ export default {
             gameOver();
         }
     }
-    function gameOver(){
+    async function gameOver(){
         console.log("death");
         balBody.position.x =0;
         balBody.position.z = 16;
         zSpeed = -0.4;
         xSpeed = 0.2
-        this.gamestarted = false;
+        gamestarted = false;
+        const scores = ref([])
+        const res = await fetch("http://localhost:8000/api")
+        scores.value = await res.json();
+        if(points>scores.value[4].score){
+            var popup = createPopup();
+        }else{
+            // Assuming you have a container element with an id of "myContainer"
+            const container = document.getElementById("canvas");
+
+            // Remove the container element from the DOM
+            container.parentNode.removeChild(container);
+
+        }
     }
+    function createPopup() {
+        var popup = document.createElement("div");
+        popup.classList.add("popup");
+        var h1 = document.createElement("h1");
+        h1.textContent = "Proficiat! U heeft de top 5 behaald";
+        popup.appendChild(h1);
+
+        var title = document.createElement("h2");
+        title.textContent = "Voornaam";
+        title.style.textAlign = "left"; 
+
+        popup.appendChild(title);
+
+        var input = document.createElement("input");
+        input.type = "text";
+        input.id = "nameInput";
+        input.placeholder = "Vul uw naam in";
+        popup.appendChild(input);
+
+        var submitBtn = document.createElement("button");
+        submitBtn.id = "submitBtn";
+        submitBtn.textContent = "Submit";
+        popup.appendChild(submitBtn);
+
+        document.body.appendChild(popup);
+
+
+        submitBtn.addEventListener("click", function() {
+            var name = input.value;
+            if (name.trim() !== "") {
+                points = 6;
+                submitData(name,points);
+            }
+        });
+    }
+    async function submitData(name, points){
+    const data = { name, points };
+    try {
+        const res = await fetch("http://localhost:8000/api/edit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (res.ok) {
+            console.log("Data sent successfully!");
+            this.navigateTo('/Highscores');
+        } else {
+            console.log("Failed to send data!");
+        }
+    } catch (error) {
+        console.log("error", error);
+    }
+    };
     function LoseLife(){
         lives --;
         gamestarted = false;
         balBody.position.x =0;
         balBody.position.z = 16;
         zSpeed = -0.4;
-        xSpeed = 0.2
+        xSpeed = 0.2;
+        if(lives == 0){
+            gameOver();
+        }else{
+            StartGame.setText("Start the game by pressing V");
+
+        }
+        livesLabel.setText("Lives: "+lives);
     }
 
-    function TextOnScreen(){
+    function TextOnScreen() {
+        const labels = document.getElementsByClassName('label');
+        while (labels.length > 0) {
+            labels[0].parentNode.removeChild(labels[0]);
+        }
+
         puntenText();
         levelText();
         levensText();
     }
-    function puntenText(){
-        const levelDiv = document.createElement( 'div' );
-        levelDiv.className = 'label';
-        levelDiv.textContent = 'Punten: '+ points;
-        levelDiv.style.backgroundColor = 'transparent';
 
-        const levelLabel = new CSS2DObject( levelDiv );
-        levelLabel.position.set(0, 10, 0);
-        levelLabel.center.set( 0, 1 );
-        scene.add( levelLabel );
-        levelLabel.layers.set( 0 );
-    }
-    function levensText(){
-        const levelDiv = document.createElement( 'div' );
-        levelDiv.className = 'label';
-        levelDiv.textContent = 'Levens: '+lives;
-        levelDiv.style.backgroundColor = 'transparent';
-
-        const levelLabel = new CSS2DObject( levelDiv );
-        levelLabel.position.set(0, 10, 0.5 );
-        levelLabel.center.set( 0, 1 );
-        scene.add( levelLabel );
-        levelLabel.layers.set( 0 );
-    }
-    function levelText(){
-        const levelDiv = document.createElement( 'div' );
-        levelDiv.className = 'label';
-        levelDiv.textContent = 'Level: '+level;
-        levelDiv.style.backgroundColor = 'transparent';
-
-        const levelLabel = new CSS2DObject( levelDiv );
-        levelLabel.position.set(0, 10, -0.5 );
-        levelLabel.center.set( 0, 1 );
-        scene.add( levelLabel );
-        levelLabel.layers.set( 0 );
-    }
+    
     function checkEndLevel(){
         if(boxesPhysical.length == 0){
             gamestarted = false;
@@ -372,7 +474,7 @@ export default {
             balBody.position.z = 16;
             zSpeed = -0.4;
             xSpeed = 0.2
-
+            levelLabel.setText("Level: "+level);
             levelClear();
             generateLevel();
         }
@@ -391,9 +493,111 @@ export default {
             speedMultiplier = 2.5;
         }
     }
+    function puntenText() {
+        const puntenDiv = document.createElement('div');
+        puntenDiv.className = 'label';
+        puntenDiv.textContent = 'Punten: ' + points;
+
+        const puntenLabel = new CSS2DObject(puntenDiv);
+        puntenLabel.position.set(0, 10, 0);
+        scene.add(puntenLabel);
+    }
+
+    function levensText() {
+        const levensDiv = document.createElement('div');
+        levensDiv.className = 'label';
+        levensDiv.textContent = 'Levens: ' + lives;
+
+        const levensLabel = new CSS2DObject(levensDiv);
+        levensLabel.position.set(0, 10, 0.5);
+        scene.add(levensLabel);
+    }
+
+    function levelText() {
+        const levelDiv = document.createElement('div');
+        levelDiv.className = 'label';
+        levelDiv.textContent = 'Level: ' + level;
+
+        const levelLabel = new CSS2DObject(levelDiv);
+        levelLabel.position.set(0, 10, -0.5);
+        scene.add(levelLabel);
+    }
   },
 };
 </script>
 <template>
-  <div ref="container" class="container"></div>
+     
+    <div ref="container" class="container"></div>
 </template>
+<style>
+.text-fields {
+  position: absolute;
+  top: 125px;
+  left: 10px;
+  text-align: left;
+  color: aliceblue;
+  z-index: 1;
+}
+
+.text-field {
+  margin: 0px;
+}
+.container{
+    position: relative;
+    left: -575px;
+}
+.label {
+  position: absolute;
+  color: white;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  pointer-events: none;
+}
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 200px;
+  background-color: #fff;
+  padding: 20px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.popup h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.popup h2 {
+  margin-top: 0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.popup input {
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 200px;
+  height: 30px;
+}
+
+.popup button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.popup button:hover {
+  background-color: #45a049;
+}
+</style>
