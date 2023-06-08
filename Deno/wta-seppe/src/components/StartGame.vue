@@ -1,7 +1,7 @@
 <template>
     <div>
-      <Controls />
       <Game />
+      <Controls />
     </div>
   </template>
   
@@ -11,13 +11,12 @@
   import Game from "./Game.vue";
   
   const app = createApp({
-    // Your component options
   });
   
   
   app.component("Controls", Controls); // Register the Controls component
   app.component("Game", Game); // Register the Game component
-  
+
   app.mount("#app");
   </script>
   
